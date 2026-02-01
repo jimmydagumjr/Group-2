@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import json
 import requests
 import csv
@@ -6,6 +7,22 @@ import os
 
 if not os.path.exists("data"):
  os.makedirs("data")
+
+load_dotenv()
+
+token = os.getenv("GITHUB_TOKEN")
+if not token:
+    raise RuntimeError("GITHUB_TOKEN not found. Did you create a .env file?")
+
+SOURCE_EXTS = {".java", ".kt", ".c", ".cpp", ".h", ".hpp", ".cmake"}
+SOURCE_BASENAMES = {"CMakeLists.txt"}
+
+def is_source_file(path: str) -> bool:
+    base = os.path.basename(path)
+    if base in SOURCE_BASENAMES:
+        return True
+    _, ext = os.path.splitext(path)
+    return ext.lower() in SOURCE_EXTS
 
 # GitHub Authentication function
 def github_auth(url, lsttoken, ct):
@@ -47,6 +64,8 @@ def countfiles(dictfiles, lsttokens, repo):
                 filesjson = shaDetails['files']
                 for filenameObj in filesjson:
                     filename = filenameObj['filename']
+                    if not is_source_file(filename):
+                        continue
                     dictfiles[filename] = dictfiles.get(filename, 0) + 1
                     print(filename)
             ipage += 1
@@ -64,7 +83,7 @@ repo = 'scottyab/rootbeer'
 # Remember to empty the list when going to commit to GitHub.
 # Otherwise they will all be reverted and you will have to re-create them
 # I would advise to create more than one token for repos with heavy commits
-lstTokens = [""]
+lstTokens = [token]
 
 dictfiles = dict()
 countfiles(dictfiles, lstTokens, repo)
@@ -72,7 +91,7 @@ print('Total number of files: ' + str(len(dictfiles)))
 
 file = repo.split('/')[1]
 # change this to the path of your file
-fileOutput = 'data/file_' + file + '.csv'
+fileOutput = 'data/source_file_' + file + '.csv'
 rows = ["Filename", "Touches"]
 fileCSV = open(fileOutput, 'w')
 writer = csv.writer(fileCSV)
