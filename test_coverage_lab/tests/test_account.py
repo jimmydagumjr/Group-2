@@ -93,32 +93,6 @@ Each test should include:
 - A meaningful **commit message** when submitting their PR.
 """
 
-# ===========================
-# Test: Valid Withdrawal
-# Author: Jimmy Dagum
-# Date: 2026-02-06
-# Description: Ensure withdrawing a valid amount decreases the balance correctly.
-# ===========================
-
-def test_valid_withdrawal(setup_account):
-    """Test withdrawing a valid amount from an account reduces balance correctly."""
-    account = setup_account
-
-    # Arrange: give the account an initial balance
-    account.balance = 100.00
-    db.session.commit()
-
-    # Act: withdraw a valid amount
-    account.withdraw(40.00)
-    db.session.commit()
-
-    # Assert: balance decreased by the withdrawn amount
-    assert account.balance == 60.00
-
-    # Verify persisted in the database
-    refreshed = Account.query.get(account.id)
-    assert refreshed.balance == 60.00
-
 # TODO 1: Test Default Values
 # - Ensure that new accounts have the correct default values (e.g., `disabled=False`).
 # - Check if an account has no assigned role, it defaults to "user".
@@ -142,6 +116,38 @@ def test_valid_withdrawal(setup_account):
 # TODO 6: Test Account Persistence
 # - Create an account, commit the session, and restart the session.
 # - Ensure the account still exists in the database.
+
+# ===========================
+# Test: Account Persistence
+# Author: Jimmy Dagum
+# Date: 2026-02-10
+# Description: Ensure an account remains stored in the database after committing
+# the session and restarting it.
+# ===========================
+
+def test_account_persistence():
+    """Test that an account persists after committing and restarting the session.
+
+    This verifies that once an Account is committed to the database, it can still be
+    retrieved after the SQLAlchemy session is cleared (simulating an app/session restart).
+    """
+    # Arrange: create and commit a new account
+    account = Account(name="Jimmy Persist", email="jimmy.persist@example.com")
+    db.session.add(account)
+    db.session.commit()
+
+    saved_id = account.id
+    assert saved_id is not None
+
+    # Act: "restart" the session (clear identity map / cached objects)
+    db.session.remove()
+
+    # Assert: account can still be retrieved from the database
+    reloaded = Account.query.get(saved_id)
+    assert reloaded is not None
+    assert reloaded.id == saved_id
+    assert reloaded.name == "Jimmy Persist"
+    assert reloaded.email == "jimmy.persist@example.com"
 
 # TODO 7: Test Searching by Name
 # - Ensure accounts can be searched by their **name**.
