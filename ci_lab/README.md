@@ -1,3 +1,8 @@
+[![CI Workflow](https://github.com/jimmydagumjr/Group-2/actions/workflows/ci.yml/badge.svg)](https://github.com/jimmydagumjr/Group-2/actions/workflows/ci.yml)
+
+![Lint](https://img.shields.io/badge/lint-flake8-blue)
+![Coverage](https://img.shields.io/badge/coverage-pytest--cov-blue)
+
 # **📌 Continuous Integration (CI) Lab**
 Welcome to the **CI Lab**! In this lab, you will extend your work from the Testing Lab by setting up a **Continuous Integration (CI) pipeline** using **GitHub Actions**. This pipeline will automatically run tests and enforce code quality whenever changes are pushed to the repository.
 
