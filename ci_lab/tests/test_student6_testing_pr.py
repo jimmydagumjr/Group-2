@@ -13,4 +13,4 @@ def test_list_counters_empty_returns_empty_dict(client):
     client.post("/counters/reset")  # ensure clean state
     response = client.get("/counters")
     assert response.status_code == HTTPStatus.OK
-    assert response.get_json() == {}
+    assert response.get_json() == {"break": True}
