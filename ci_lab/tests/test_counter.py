@@ -197,7 +197,9 @@ class TestCounterEndpoints:
         assert response.status_code == HTTPStatus.OK
         assert response.get_json() == {"test1": 0}
 
-        # TODO: Add an assertion to check that retrieving the counter still works
+        get_response = client.get('/counters/test1')
+        assert get_response.status_code == HTTPStatus.OK
+        assert get_response.get_json() == {"test1": 0}
 
     # ===========================
     # Test: Prevent resetting a non-existent counter
